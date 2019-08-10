@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">RecipeApp</string>
+    <string name="recipe_photo_cd">recipe_photo_cd</string>
+    <string name="tags">Tags:</string>
+    <string name="chef_name">Chef name:</string>
+    <string name="recipe_description">Description:</string>
+</resources>
