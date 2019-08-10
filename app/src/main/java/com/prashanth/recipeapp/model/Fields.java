@@ -4,17 +4,14 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
 public class Fields {
 
-    //chef details
-
     @SerializedName("name")
     private String name;
-
-    //I don't know what this is for
 
     @SerializedName("country")
     private String country;
@@ -34,8 +31,6 @@ public class Fields {
     @SerializedName("body")
     private String body;
 
-    //Recipe details
-
     @SerializedName("title")
     private String title;
 
@@ -54,11 +49,10 @@ public class Fields {
     @SerializedName("tags")
     private List<Object> tags;
 
-    //image details
-
     @SerializedName("file")
     private File file;
 
+    @NotNull
     @Override
     public String toString() {
         return "Fields{" +

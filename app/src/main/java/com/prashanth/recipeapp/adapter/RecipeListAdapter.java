@@ -23,7 +23,6 @@ import com.prashanth.recipeapp.util.Constants;
 import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
-import timber.log.Timber;
 
 public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.ViewHolder> {
 
@@ -71,10 +70,6 @@ public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.Vi
             intent.putStringArrayListExtra(Constants.TAGS, tags);
             context.startActivity(intent);
         });
-
-        Timber.d("Chef's name %s", getChefName(itemList.get(position).getFields()));
-        Timber.d("Description %s", itemList.get(position).getFields().getDescription());
-        Timber.d("Tags %s", getTags(itemList.get(position).getFields()));
 
     }
 
@@ -129,9 +124,9 @@ public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.Vi
     private ArrayList<String> getTags(Fields fields) {
         ArrayList<String> tags = new ArrayList<>();
         if (fields.getTags() != null) {
-            for (Object innerSys : fields.getTags()) {
+            for (Object sys : fields.getTags()) {
                 for (Item item : tagsAndChefsList) {
-                    if (((LinkedTreeMap) ((LinkedTreeMap) innerSys).get("sys")).get("id").equals(item.getSys().getId())) {
+                    if (((LinkedTreeMap) ((LinkedTreeMap) sys).get("sys")).get("id").equals(item.getSys().getId())) {
                         tags.add(item.getFields().getName());
                     }
                 }

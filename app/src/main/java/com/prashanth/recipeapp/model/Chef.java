@@ -9,6 +9,6 @@ import lombok.Setter;
 public class Chef {
 
     @SerializedName("sys")
-    private InnerSys sys;
+    private Sys sys;
 
 }

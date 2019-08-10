@@ -9,6 +9,6 @@ import lombok.Setter;
 public class Photo {
 
     @SerializedName("sys")
-    private InnerSys sys;
+    private Sys sys;
 
 }

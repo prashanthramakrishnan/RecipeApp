@@ -10,13 +10,13 @@ import org.jetbrains.annotations.NotNull;
 public class Space {
 
     @SerializedName("sys")
-    private InnerSys innerSys;
+    private Sys sys;
 
     @NotNull
     @Override
     public String toString() {
         return "Space{" +
-                "innerSys=" + innerSys +
+                "sys=" + sys +
                 '}';
     }
 }
