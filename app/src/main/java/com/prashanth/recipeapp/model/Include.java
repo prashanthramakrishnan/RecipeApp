@@ -1,7 +1,7 @@
 package com.prashanth.recipeapp.model;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
+import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class Include {
 
     @SerializedName("Asset")
-    private List<Assets> assets;
+    private ArrayList<Assets> assets;
 
     @NotNull
     @Override

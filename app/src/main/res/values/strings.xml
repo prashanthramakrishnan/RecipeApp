@@ -4,4 +4,7 @@
     <string name="tags">Tags:</string>
     <string name="chef_name">Chef name:</string>
     <string name="recipe_description">Description:</string>
+    <string name="none">None</string>
+    <string name="loading">Loading recipes.. please wait!</string>
+    <string name="error">Something went wrong, load the app again..</string>
 </resources>

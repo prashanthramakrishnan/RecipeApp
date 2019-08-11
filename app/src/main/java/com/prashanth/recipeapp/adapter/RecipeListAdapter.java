@@ -1,5 +1,9 @@
 package com.prashanth.recipeapp.adapter;
 
+import static com.prashanth.recipeapp.util.Utils.getChefName;
+import static com.prashanth.recipeapp.util.Utils.getPhotoUrl;
+import static com.prashanth.recipeapp.util.Utils.getTags;
+
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -13,26 +17,23 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.gson.internal.LinkedTreeMap;
 import com.prashanth.recipeapp.R;
 import com.prashanth.recipeapp.model.Assets;
-import com.prashanth.recipeapp.model.Fields;
 import com.prashanth.recipeapp.model.Item;
 import com.prashanth.recipeapp.ui.RecipeDetailsActivity;
-import com.prashanth.recipeapp.util.Constants;
+import com.prashanth.recipeapp.util.Utils;
 import java.util.ArrayList;
-import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.ViewHolder> {
 
     private Context context;
 
-    private List<Assets> assetsList;
+    private ArrayList<Assets> assetsList;
 
-    private List<Item> itemList;
+    private ArrayList<Item> itemList;
 
-    private List<Item> tagsAndChefsList;
+    private ArrayList<Item> tagsAndChefsList;
 
     public RecipeListAdapter(Context context) {
         this.context = context;
@@ -48,10 +49,10 @@ public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String title = itemList.get(position).getFields().getTitle();
-        String recipePhotoUrl = "https:" + getPhotoUrl(itemList.get(position).getFields().getPhoto().getSys().getId());
-        String chefName = getChefName(itemList.get(position).getFields());
+        String recipePhotoUrl = getPhotoUrl(itemList.get(position).getFields().getPhoto().getSys().getId(), assetsList);
+        String chefName = getChefName(itemList.get(position).getFields(), tagsAndChefsList);
         String description = itemList.get(position).getFields().getDescription();
-        ArrayList<String> tags = getTags(itemList.get(position).getFields());
+        ArrayList<String> tags = getTags(itemList.get(position).getFields(), tagsAndChefsList);
 
         holder.recipeTitle.setText(title);
         Glide.with(context.getApplicationContext())
@@ -63,11 +64,11 @@ public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.Vi
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, RecipeDetailsActivity.class);
-            intent.putExtra(Constants.TITLE, title);
-            intent.putExtra(Constants.RECIPE_PHOTO_URL, recipePhotoUrl);
-            intent.putExtra(Constants.CHEF_NAME, chefName);
-            intent.putExtra(Constants.DESCRIPTION, description);
-            intent.putStringArrayListExtra(Constants.TAGS, tags);
+            intent.putExtra(Utils.TITLE, title);
+            intent.putExtra(Utils.RECIPE_PHOTO_URL, recipePhotoUrl);
+            intent.putExtra(Utils.CHEF_NAME, chefName);
+            intent.putExtra(Utils.DESCRIPTION, description);
+            intent.putStringArrayListExtra(Utils.TAGS, tags);
             context.startActivity(intent);
         });
 
@@ -92,47 +93,11 @@ public class RecipeListAdapter extends RecyclerView.Adapter<RecipeListAdapter.Vi
         }
     }
 
-    public void update(List<Item> itemList, List<Assets> assetsList, List<Item> tagsAndChefsList) {
+    public void update(ArrayList<Item> itemList, ArrayList<Assets> assetsList, ArrayList<Item> tagsAndChefsList) {
         this.itemList = itemList;
         this.tagsAndChefsList = tagsAndChefsList;
         this.assetsList = assetsList;
         notifyDataSetChanged();
-    }
-
-    private String getPhotoUrl(String id) {
-        if (id != null) {
-            for (Assets asset : assetsList) {
-                if (asset.getSys().getId().equals(id)) {
-                    return asset.getFields().getFile().getUrl();
-                }
-            }
-        }
-        return null;
-    }
-
-    private String getChefName(Fields fields) {
-        if (fields.getChef() != null) {
-            for (Item item : tagsAndChefsList) {
-                if (item.getSys().getId().equals(fields.getChef().getSys().getId())) {
-                    return item.getFields().getName();
-                }
-            }
-        }
-        return null;
-    }
-
-    private ArrayList<String> getTags(Fields fields) {
-        ArrayList<String> tags = new ArrayList<>();
-        if (fields.getTags() != null) {
-            for (Object sys : fields.getTags()) {
-                for (Item item : tagsAndChefsList) {
-                    if (((LinkedTreeMap) ((LinkedTreeMap) sys).get("sys")).get("id").equals(item.getSys().getId())) {
-                        tags.add(item.getFields().getName());
-                    }
-                }
-            }
-        }
-        return tags;
     }
 
 }

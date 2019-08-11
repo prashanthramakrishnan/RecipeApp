@@ -67,7 +67,7 @@
                                 android:textSize="16sp"
                                 android:gravity="start"
                                 android:layout_marginStart="5dp"
-                                tools:text="Vegetarian food"
+                                android:text="@string/none"
                                 android:textStyle="bold"
                                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
@@ -128,7 +128,7 @@
                                 android:textSize="16sp"
                                 android:gravity="start"
                                 android:layout_marginStart="5dp"
-                                tools:text="Gordon Ramsey"
+                                android:text="@string/none"
                                 android:textStyle="bold"
                                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
                     </LinearLayout>

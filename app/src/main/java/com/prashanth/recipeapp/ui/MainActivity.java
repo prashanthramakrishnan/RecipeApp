@@ -1,35 +1,25 @@
 package com.prashanth.recipeapp.ui;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.contentful.java.cda.CDAArray;
-import com.contentful.java.cda.CDAClient;
-import com.contentful.java.cda.CDAEntry;
-import com.contentful.java.cda.CDAResource;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.prashanth.recipeapp.R;
 import com.prashanth.recipeapp.RecipeApplication;
 import com.prashanth.recipeapp.adapter.RecipeListAdapter;
+import com.prashanth.recipeapp.contract.APIContract;
 import com.prashanth.recipeapp.model.Assets;
 import com.prashanth.recipeapp.model.Item;
-import com.prashanth.recipeapp.model.RecipeResponse;
 import com.prashanth.recipeapp.network.RecipeAPI;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subscribers.DisposableSubscriber;
+import com.prashanth.recipeapp.presenter.RecipeListPresenter;
 import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
-import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements APIContract.RecipeListView {
 
     private static final String SPACE_ID = "kk2bw5ojx476";
 
@@ -44,14 +34,13 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     LinearLayoutManager linearLayoutManager;
 
+    @Inject
+    RecipeListPresenter presenter;
+
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private List<Item> itemList = new ArrayList<>();
-
-    private List<Assets> assetsList = new ArrayList<>();
-
-    private List<Item> tagsAndChefsList = new ArrayList<>();
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,93 +49,52 @@ public class MainActivity extends AppCompatActivity {
 
         RecipeApplication.component.inject(this);
         ButterKnife.bind(this);
+        progressDialog = new ProgressDialog(this);
 
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
-
-        Disposable disposable = api.getRecipes(SPACE_ID,
-                ACCESS_TOKEN)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<RecipeResponse>() {
-                    @Override
-                    public void onNext(RecipeResponse response) {
-                        Timber.d("Recipe response %s", response.toString());
-                        //get items
-                        if (response.getItems() != null && !response.getItems().isEmpty()) {
-                            for (Item item : response.getItems()) {
-                                if (item.getFields().getTitle() != null) {
-                                    itemList.add(item);
-                                } else {
-                                    tagsAndChefsList.add(item);
-                                }
-                            }
-                        }
-
-                        //get assets
-                        if (response.getInclude() != null && response.getInclude().getAssets() != null && !response.getInclude().getAssets().isEmpty()) {
-                            assetsList = response.getInclude().getAssets();
-                        }
-
-                        adapter.update(itemList, assetsList, tagsAndChefsList);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Timber.e(e, "error");
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+        presenter.fetchRecipe(SPACE_ID, ACCESS_TOKEN, this);
 
     }
 
-    private String getPhotoUrl(String id) {
-        if (id != null) {
-            for (Assets asset : assetsList) {
-                if (asset.getSys().getId().equals(id)) {
-                    return asset.getFields().getFile().getUrl();
-                }
-            }
+    @Override
+    public void callStarted() {
+        showProgressDialog();
+    }
+
+    @Override
+    public void callComplete() {
+        dismissProgressDialog();
+    }
+
+    @Override
+    public void callFailed(Throwable throwable) {
+        dismissProgressDialog();
+        showSnackBarError();
+    }
+
+    @Override
+    public void onResponseRecipeList(ArrayList<Item> itemsList, ArrayList<Assets> assetsList, ArrayList<Item> chefsAndTagsList) {
+        adapter.update(itemsList, assetsList, chefsAndTagsList);
+    }
+
+    private void showProgressDialog() {
+        if (progressDialog != null && !progressDialog.isShowing()) {
+            progressDialog.setMessage(getString(R.string.loading));
+            progressDialog.show();
+            progressDialog.setCancelable(false);
         }
-        return null;
     }
 
-    private void contentFulSDKAPI() {
-        CDAClient client = CDAClient.builder()
-                .setSpace(SPACE_ID)
-                .setToken(ACCESS_TOKEN)
-                .build();
+    private void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        client.observe(CDAEntry.class)
-                .where("content_type", "tag")
-                .all()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe((new DisposableSubscriber<CDAArray>() {
-                    CDAArray result;
-
-                    @Override
-                    public void onError(Throwable error) {
-                        Timber.e(error, "could not request entry");
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        for (CDAResource resource : result.items()) {
-                            CDAEntry entry = (CDAEntry) resource;
-//                            Timber.d(entry.getField("productName").toString());
-                        }
-                    }
-
-                    @Override
-                    public void onNext(CDAArray cdaArray) {
-                        result = cdaArray;
-                    }
-                }));
+    private void showSnackBarError() {
+        Snackbar.make(findViewById(android.R.id.content), getString(R.string.error), Snackbar.LENGTH_LONG)
+                .setActionTextColor(getResources().getColor(android.R.color.holo_red_light))
+                .show();
     }
 }
