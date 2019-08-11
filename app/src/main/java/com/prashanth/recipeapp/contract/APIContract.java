@@ -22,8 +22,6 @@ public interface APIContract {
 
     interface Presenter {
 
-        void subscribe();
-
         void unsubscribe();
 
         void onDestroy();

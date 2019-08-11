@@ -1,5 +1,6 @@
 package com.prashanth.recipeapp.presenter;
 
+import androidx.annotation.VisibleForTesting;
 import com.prashanth.recipeapp.RecipeApplication;
 import com.prashanth.recipeapp.contract.APIContract;
 import com.prashanth.recipeapp.model.Assets;
@@ -38,9 +39,10 @@ public class RecipeListPresenter implements APIContract.Presenter {
         RecipeApplication.component.inject(this);
     }
 
-    @Override
-    public void subscribe() {
-        fetchRecipe(spaceID, accessToken, view);
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public RecipeListPresenter(RecipeAPI api) {
+        compositeDisposable = new CompositeDisposable();
+        this.api = api;
     }
 
     @Override
